@@ -9,13 +9,31 @@ services:
     healthCheckPath: /health
     envVars:
       - key: EMBED_MODEL
-        value: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+        value: intfloat/multilingual-e5-small
+      - key: EMBED_MAX_SEQ_LEN
+        value: "128"
+      # Utiliser l'API d'inférence Hugging Face (sans téléchargement local)
+      - key: EMBED_USE_REMOTE
+        value: "0"
+      # Si EMBED_USE_REMOTE=1, fournir un token HF
+      # - key: HF_TOKEN
+      #   value: "<ton_token_hf>"
+      # Préfixe recommandé pour E5
+      - key: EMBED_PREFIX
+        value: "query: "
       - key: HF_HUB_ENABLE_HF_TRANSFER
         value: "1"
       - key: TRANSFORMERS_CACHE
         value: /tmp/hf
       - key: SENTENCE_TRANSFORMERS_HOME
         value: /tmp/st
+      # Réduire threads CPU pour limiter l'empreinte mémoire
+      - key: OMP_NUM_THREADS
+        value: "1"
+      - key: MKL_NUM_THREADS
+        value: "1"
+      - key: PYTORCH_NUM_THREADS
+        value: "1"
       - key: TRANSFORMERS_NO_TF
         value: "1"
       - key: TRANSFORMERS_NO_FLAX

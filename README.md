@@ -8,11 +8,15 @@ Petite API pour générer des embeddings avec le modèle en ligne
 - POST `/embed`: body `{ "text": "..." }` → `{ embedding: number[], dim: 384 }`
 
 ## Variables d'environnement
-- `EMBED_MODEL` (optionnel): par défaut `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`
+- `EMBED_MODEL` (optionnel): par défaut `intfloat/multilingual-e5-small` (léger et multilingue)
+- `EMBED_USE_REMOTE` (optionnel): `1` pour utiliser l'API d'inférence Hugging Face (pas de téléchargement local), `0` par défaut
+- `HF_TOKEN` (optionnel mais requis si `EMBED_USE_REMOTE=1`): token Hugging Face
 - `HF_HUB_ENABLE_HF_TRANSFER=1` (optionnel): accélère le téléchargement du modèle
 - `TRANSFORMERS_NO_TF=1`, `TRANSFORMERS_NO_FLAX=1` (optionnel): évite imports/logs TensorFlow/Flax
 - `EMBED_HOST` (optionnel): hôte de binding (défaut `0.0.0.0`)
 - `EMBED_PORT` (optionnel): port (défaut `8080`)
+ - `EMBED_MAX_SEQ_LEN` (optionnel): longueur max des séquences pour réduire la mémoire (défaut `256`)
+ - `EMBED_PREFIX` (optionnel): préfixe pour certaines familles de modèles (ex: `query: ` pour E5)
 
 ## Lancer en local (PowerShell)
 ```pwsh
@@ -49,7 +53,10 @@ Contenus nécessaires à la racine du dépôt:
 1) Pousser ce dossier dans un nouveau repo GitHub
 2) Render → New → Blueprint → sélectionner le repo → Deploy
 3) Variables d'environnement côté service:
-   - `EMBED_MODEL=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`
+  - `EMBED_MODEL=intfloat/multilingual-e5-small`
+  - `EMBED_PREFIX="query: "` (recommandé pour E5)
+  - `EMBED_USE_REMOTE=0` (mettre `1` pour passer par Hugging Face Inference API)
+  - `HF_TOKEN=<ton_token>` (requis si `EMBED_USE_REMOTE=1`)
    - `HF_HUB_ENABLE_HF_TRANSFER=1`
    - `TRANSFORMERS_NO_TF=1`, `TRANSFORMERS_NO_FLAX=1` (optionnel)
 
