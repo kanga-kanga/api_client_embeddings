@@ -8,10 +8,18 @@ import uvicorn
 app = FastAPI(title="Embedding API", version="1.0.0")
 
 MODEL_NAME = os.getenv("EMBED_MODEL", "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
-try:
-    model = SentenceTransformer(MODEL_NAME)
-except Exception as e:
-    raise RuntimeError(f"Impossible de charger le modèle {MODEL_NAME}: {e}")
+
+# Lazy-load: ne charge le modèle qu'à la première requête d'embed.
+model = None
+def get_model():
+    global model
+    if model is None:
+        try:
+            # Forcer CPU et réduire l'empreinte au démarrage
+            model = SentenceTransformer(MODEL_NAME, device="cpu")
+        except Exception as e:
+            raise RuntimeError(f"Impossible de charger le modèle {MODEL_NAME}: {e}")
+    return model
 
 
 class EmbedRequest(BaseModel):
@@ -25,7 +33,7 @@ class EmbedResponse(BaseModel):
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "model": MODEL_NAME}
+    return {"status": "ok", "model": MODEL_NAME, "loaded": bool(model is not None)}
 
 
 @app.post("/embed", response_model=EmbedResponse)
@@ -34,7 +42,8 @@ def embed(req: EmbedRequest):
     if not t:
         raise HTTPException(status_code=400, detail="Texte vide")
     try:
-        vec = model.encode([t], normalize_embeddings=False)
+        mdl = get_model()
+        vec = mdl.encode([t], normalize_embeddings=False)
         arr = vec[0].tolist()
         return {"embedding": arr, "dim": len(arr)}
     except Exception as e:

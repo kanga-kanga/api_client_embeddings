@@ -12,6 +12,10 @@ services:
         value: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
       - key: HF_HUB_ENABLE_HF_TRANSFER
         value: "1"
+      - key: TRANSFORMERS_CACHE
+        value: /tmp/hf
+      - key: SENTENCE_TRANSFORMERS_HOME
+        value: /tmp/st
       - key: TRANSFORMERS_NO_TF
         value: "1"
       - key: TRANSFORMERS_NO_FLAX
